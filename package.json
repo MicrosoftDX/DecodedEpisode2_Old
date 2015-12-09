@@ -1,0 +1,23 @@
+{
+  "name": "DecodedEpisode2",
+  "version": "1.0.0",
+  "description": "Follow along with the show",
+  "main": "api.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MicrosoftDX/DecodedEpisode2.git"
+  },
+  "author": "Elliott Miller <emil@microsoft.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MicrosoftDX/DecodedEpisode2/issues"
+  },
+  "homepage": "https://github.com/MicrosoftDX/DecodedEpisode2",
+  "dependencies": {
+    "restify": "^4.0.3"
+  },
+  "private": true
+}
