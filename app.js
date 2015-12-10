@@ -9,7 +9,8 @@ server.get("/contributors", function(req, res, next) {
 	github.repos.getContributors(
 		{
 			user: "nodejs",
-			repo: "node"
+			repo: "node",
+			per_page: 10
 		}, function(err, response) {
 			res.send(response);
 		}
