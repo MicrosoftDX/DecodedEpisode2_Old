@@ -1,30 +1,20 @@
 var restify = require('restify');
-var mockContributors = [
-	{
-		login: "jill",
-		avatar_url: "https://avatars0.githubusercontent.com/u/1116907?v=3&s=400",
-		contributions: 9001
-	},
-	{
-		login: "billg",
-		avatar_url: "https://avatars0.githubusercontent.com/u/1116907?v=3&s=400",
-		contributions: 8999
-	},
-	{
-		login: "sally",
-		avatar_url: "https://avatars0.githubusercontent.com/u/1116907?v=3&s=400",
-		contributions: 5325
-	},
-	{
-		login: "fred",
-		avatar_url: "https://avatars0.githubusercontent.com/u/1116907?v=3&s=400",
-		contributions: 5
-	}
-];
+var GitHubApi = require("github");
 
 var server = restify.createServer();
 server.get("/contributors", function(req, res, next) {
-	res.send(mockContributors);
+	var github = new GitHubApi({
+		version: "3.0.0",
+	});
+	github.repos.getContributors(
+		{
+			user: "nodejs",
+			repo: "node"
+		}, function(err, response) {
+			res.send(response);
+		}
+	);
+	//res.send(mockContributors);
 	next();
 });
 server.get(/.*/, restify.serveStatic({
