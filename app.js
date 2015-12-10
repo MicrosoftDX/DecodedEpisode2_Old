@@ -4,7 +4,7 @@ var GitHubApi = require("github");
 var server = restify.createServer();
 server.get("/contributors", function(req, res, next) {
 	var github = new GitHubApi({
-		version: "3.0.0",
+		version: "3.0.0"
 	});
 	github.repos.getContributors(
 		{
@@ -17,6 +17,18 @@ server.get("/contributors", function(req, res, next) {
 	);
 	//res.send(mockContributors);
 	next();
+});
+server.get("/repos/:user", function(req, res, next) {
+	var github = new GitHubApi({
+		version: "3.0.0"
+	});
+	github.repos.getFromUser(
+		{
+			user: req.params.user
+		}, function(err, response) {
+			res.send(response);
+		}
+	)
 });
 server.get(/.*/, restify.serveStatic({
 	directory: __dirname,

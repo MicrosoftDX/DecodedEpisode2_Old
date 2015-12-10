@@ -6,6 +6,12 @@
 			#contributors img {
 				height: 30px;
 			}
+			#repo_title {
+				display: none;
+			}
+			#repos {
+				display: none;
+			}
 		</style>
 	</head>
 	<body>
@@ -24,19 +30,60 @@
 				<tbody>
 				</tbody>
 			</table>
+			<h2 id="repo_title">Repositories for <span></span></h2>
+			<table class="table" id="repos">
+				<thead>
+					<tr>
+						<th>Favorite</th>
+						<th>Name</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
 		</div>
 		<script type="text/javascript">
 			function renderContributors(contributors) {
 				var $container = $("#contributors tbody");
 				$container.html("");
 				$.each(contributors, function(idx, contributor) {
-					console.log(contributor);
 					$container.append(
 						"<tr>" +
 							"<td><img src='" + contributor.avatar_url + "' /></td>" +
-							"<td><a href='#'>" + contributor.login + "</a></td>" +
+							"<td><a class='contributor' href='#'>" + contributor.login + "</a></td>" +
 							"<td>" + contributor.contributions + "</td>" +
 						"</tr>");
+				});
+				$(".contributor").click(function(e) {
+					var userName = $(e.target).html();
+					$.get("http://localhost:3000/repos/" + userName, function(result) {
+						renderRepos(userName, result);
+					});
+				});
+			}
+			function renderRepos(user, repos) {
+				var $container = $("#repos tbody");
+				$("#repo_title span").html(user);
+				$("#repo_title").show();
+				$container.html("");
+				$.each(repos, function(idx, repo) {
+					$container.append(
+						"<tr>" +
+							'<td><a href="#" class="favorite btn btn-default"><span class="glyphicon glyphicon-star"></span></a></td>' +
+							"<td>" + repo.name + "</td>" +
+						"</tr>"
+					);
+				});
+				$("#repos").show();
+				$(".favorite").click(function(e) {
+					e.preventDefault();
+					var $button = $(e.target).closest("a");
+					if($button.hasClass("btn-default")) {
+						$(e.target).closest("a").removeClass("btn-default").addClass("btn-success");
+					} else {
+						$(e.target).closest("a").removeClass("btn-success").addClass("btn-default");
+					}
+					
 				});
 			}
 			$(document).ready(function() {
