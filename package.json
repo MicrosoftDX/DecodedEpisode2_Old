@@ -18,6 +18,7 @@
   "homepage": "https://github.com/MicrosoftDX/DecodedEpisode2",
   "dependencies": {
     "github": "^0.2.4",
+    "mongodb": "^2.1.0",
     "restify": "^4.0.3"
   },
   "private": true

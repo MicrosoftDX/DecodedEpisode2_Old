@@ -43,6 +43,7 @@
 			</table>
 		</div>
 		<script type="text/javascript">
+			var selectedContributor = null;
 			function renderContributors(contributors) {
 				var $container = $("#contributors tbody");
 				$container.html("");
@@ -56,6 +57,7 @@
 				});
 				$(".contributor").click(function(e) {
 					var userName = $(e.target).html();
+					selectedContributor = userName;
 					$.get("http://localhost:3000/repos/" + userName, function(result) {
 						renderRepos(userName, result);
 					});
@@ -67,23 +69,32 @@
 				$("#repo_title").show();
 				$container.html("");
 				$.each(repos, function(idx, repo) {
+					var btnClass = "btn-default";
+					if(repo.favorite) {
+						btnClass = "btn-success";
+					}
 					$container.append(
 						"<tr>" +
-							'<td><a href="#" class="favorite btn btn-default"><span class="glyphicon glyphicon-star"></span></a></td>' +
+							'<td><a data-repo="' + repo.name + '" href="#" class="favorite btn ' + btnClass + '"><span class="glyphicon glyphicon-star"></span></a></td>' +
 							"<td>" + repo.name + "</td>" +
 						"</tr>"
 					);
+					if(repo.favorite) {
+						
+					}
 				});
 				$("#repos").show();
 				$(".favorite").click(function(e) {
 					e.preventDefault();
 					var $button = $(e.target).closest("a");
 					if($button.hasClass("btn-default")) {
-						$(e.target).closest("a").removeClass("btn-default").addClass("btn-success");
+						$button.removeClass("btn-default").addClass("btn-success");
 					} else {
-						$(e.target).closest("a").removeClass("btn-success").addClass("btn-default");
+						$button.removeClass("btn-success").addClass("btn-default");
 					}
-					
+					$.post("http://localhost:3000/favorite/" + selectedContributor + "/" + $button.attr("data-repo"), function(result) {
+						console.log(result);
+					});
 				});
 			}
 			$(document).ready(function() {
