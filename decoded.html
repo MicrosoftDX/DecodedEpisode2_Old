@@ -2,6 +2,7 @@
 	<head>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 		<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+		<script src="https://kurvejs.blob.core.windows.net/dist/kurve.min-0.3.1.js"></script>
 		<style>
 			#contributors img {
 				height: 30px;
@@ -18,6 +19,7 @@
 		<div class="container">
 			<div class="jumbotron">
 				<h1>Decoded Episode 2</h1>
+				<a href="#" id="login" class="btn btn-primary">Log in</a>
 			</div>
 			<table class="table" id="contributors">
 				<thead>
@@ -44,6 +46,14 @@
 		</div>
 		<script type="text/javascript">
 			var selectedContributor = null;
+			var curUser = null;
+			function getHeaders(user) {
+				var headers = null;
+				if(user != null) {
+					headers = {userid: curUser.upn, tenantid: curUser.tenantId};
+				}
+				return headers;
+			}
 			function renderContributors(contributors) {
 				var $container = $("#contributors tbody");
 				$container.html("");
@@ -58,8 +68,13 @@
 				$(".contributor").click(function(e) {
 					var userName = $(e.target).html();
 					selectedContributor = userName;
-					$.get("http://localhost:3000/repos/" + userName, function(result) {
-						renderRepos(userName, result);
+					
+					$.ajax({
+						url: "http://localhost:2346/repos/" + userName,
+						headers: getHeaders(curUser),
+						success: function(result) {
+							renderRepos(userName, result);
+						}
 					});
 				});
 			}
@@ -79,9 +94,6 @@
 							"<td>" + repo.name + "</td>" +
 						"</tr>"
 					);
-					if(repo.favorite) {
-						
-					}
 				});
 				$("#repos").show();
 				$(".favorite").click(function(e) {
@@ -92,14 +104,36 @@
 					} else {
 						$button.removeClass("btn-success").addClass("btn-default");
 					}
-					$.post("http://localhost:3000/favorite/" + selectedContributor + "/" + $button.attr("data-repo"), function(result) {
-						console.log(result);
+					$.ajax({
+						url: "http://localhost:2346/favorite/" + selectedContributor + "/" + $button.attr("data-repo"),
+						type: 'post',
+						headers: getHeaders(curUser),
+						success: function(data) {
+							console.log(data);
+						}
 					});
 				});
 			}
 			$(document).ready(function() {
-				$.get("http://localhost:3000/contributors", function(result) {
+				var identity = new Kurve.Identity(
+					"client_id",
+					"http://localhost:2346/login.html"
+				);
+				
+				$.get("http://localhost:2346/contributors", function(result) {
 					renderContributors(result);
+				});
+				
+				$("#login").click(function(e) {
+					e.preventDefault();
+					identity.login(function(error) {
+						if(identity.isLoggedIn()) {
+							curUser = identity.getIdToken();
+							$("#repo_title").hide();
+							$("#repos").hide();
+							$("#login").hide();
+						}
+					});
 				});
 			});
 		</script>
