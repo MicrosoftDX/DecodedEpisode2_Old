@@ -12,6 +12,7 @@ var mongoServer = process.env.DECODED_MONGO_SERVER;
 var mongoUri = "mongodb://" + mongoUser + ":" + mongoPassword + "@" + mongoServer;
 var aadClientID = process.env.DECODED_CLIENT_ID;
 var aadCallbackUrl = process.env.DECODED_CALLBACK_URL;
+var port = process.env.DECODED_PORT;
 
 var numProcessed = 0;
 
@@ -137,6 +138,6 @@ server.get(/.*/, restify.serveStatic({
 	default: 'decoded.html'
 }));
 
-server.listen(2346, function() {
+server.listen(port, function() {
 	console.log("Listening for requests");
 });

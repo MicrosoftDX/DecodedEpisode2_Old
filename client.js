@@ -18,7 +18,7 @@ function renderContributors(contributors) {
         selectedContributor = userName;
 
         $.ajax({
-            url: "http://localhost:2346/repos/" + userName,
+            url: "/repos/" + userName,
             headers: getHeaders(curUser),
             success: function (result) {
                 renderRepos(userName, result);
@@ -44,7 +44,7 @@ function renderRepos(user, repos) {
         var $button = $(e.target).closest("a");
         var isFavorite = $button.hasClass("btn-default");
         $.ajax({
-            url: "http://localhost:2346/favorite/" + selectedContributor + "/" + $button.attr("data-repo"),
+            url: "/favorite/" + selectedContributor + "/" + $button.attr("data-repo"),
             type: 'post',
             data: {
                 isFavorite: isFavorite
