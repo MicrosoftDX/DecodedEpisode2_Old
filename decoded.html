@@ -3,6 +3,7 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 		<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
 		<script src="https://kurvejs.blob.core.windows.net/dist/kurve.min-0.3.1.js"></script>
+		<script type="text/javascript" src="./client.js"></script>
 		<style>
 			#contributors img {
 				height: 30px;
@@ -44,98 +45,5 @@
 				</tbody>
 			</table>
 		</div>
-		<script type="text/javascript">
-			var selectedContributor = null;
-			var curUser = null;
-			function getHeaders(user) {
-				var headers = null;
-				if(user != null) {
-					headers = {userid: curUser.upn, tenantid: curUser.tenantId};
-				}
-				return headers;
-			}
-			function renderContributors(contributors) {
-				var $container = $("#contributors tbody");
-				$container.html("");
-				$.each(contributors, function(idx, contributor) {
-					$container.append(
-						"<tr>" +
-							"<td><img src='" + contributor.avatar_url + "' /></td>" +
-							"<td><a class='contributor' href='#'>" + contributor.login + "</a></td>" +
-							"<td>" + contributor.contributions + "</td>" +
-						"</tr>");
-				});
-				$(".contributor").click(function(e) {
-					var userName = $(e.target).html();
-					selectedContributor = userName;
-					
-					$.ajax({
-						url: "http://localhost:2346/repos/" + userName,
-						headers: getHeaders(curUser),
-						success: function(result) {
-							renderRepos(userName, result);
-						}
-					});
-				});
-			}
-			function renderRepos(user, repos) {
-				var $container = $("#repos tbody");
-				$("#repo_title span").html(user);
-				$("#repo_title").show();
-				$container.html("");
-				$.each(repos, function(idx, repo) {
-					var btnClass = "btn-default";
-					if(repo.favorite) {
-						btnClass = "btn-success";
-					}
-					$container.append(
-						"<tr>" +
-							'<td><a data-repo="' + repo.name + '" href="#" class="favorite btn ' + btnClass + '"><span class="glyphicon glyphicon-star"></span></a></td>' +
-							"<td>" + repo.name + "</td>" +
-						"</tr>"
-					);
-				});
-				$("#repos").show();
-				$(".favorite").click(function(e) {
-					e.preventDefault();
-					var $button = $(e.target).closest("a");
-					if($button.hasClass("btn-default")) {
-						$button.removeClass("btn-default").addClass("btn-success");
-					} else {
-						$button.removeClass("btn-success").addClass("btn-default");
-					}
-					$.ajax({
-						url: "http://localhost:2346/favorite/" + selectedContributor + "/" + $button.attr("data-repo"),
-						type: 'post',
-						headers: getHeaders(curUser),
-						success: function(data) {
-							console.log(data);
-						}
-					});
-				});
-			}
-			$(document).ready(function() {
-				var identity = new Kurve.Identity(
-					"client_id",
-					"http://localhost:2346/login.html"
-				);
-				
-				$.get("http://localhost:2346/contributors", function(result) {
-					renderContributors(result);
-				});
-				
-				$("#login").click(function(e) {
-					e.preventDefault();
-					identity.login(function(error) {
-						if(identity.isLoggedIn()) {
-							curUser = identity.getIdToken();
-							$("#repo_title").hide();
-							$("#repos").hide();
-							$("#login").hide();
-						}
-					});
-				});
-			});
-		</script>
 	</body>
 </html>

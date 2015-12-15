@@ -1,17 +1,28 @@
+declare var require:any;
+declare var process:any;
+declare var __dirname:any;
+
 var restify = require('restify');
 var GitHubApi = require("github");
 var mongo = require('mongodb').MongoClient;
 
-var mongoUser = "USER";
-var mongoPassword = "PASS";
-var mongoServer = "YOURSERVER";
+var mongoUser = process.env.DECODED_MONGO_USER;
+var mongoPassword = process.env.DECODED_MONGO_PASSWORD;
+var mongoServer = process.env.DECODED_MONGO_SERVER;
 var mongoUri = "mongodb://" + mongoUser + ":" + mongoPassword + "@" + mongoServer;
+var aadClientID = process.env.DECODED_CLIENT_ID;
+var aadCallbackUrl = process.env.DECODED_CALLBACK_URL;
 
 var numProcessed = 0;
 
 var markRepo = function(db, req, repo, payload, originalPayload, res) {
 	var favorites = null;
-	var objToFind = {user: req.params.user, repo: repo.name};
+	var objToFind = {
+		user: req.params.user, 
+		repo: repo.name,
+		userid: null,
+		tenantid: null
+	};
 	var userid = req.header("userid");
 	var tenantid = req.header("tenantid");
 	if(userid != null && tenantid != null) {
@@ -22,11 +33,9 @@ var markRepo = function(db, req, repo, payload, originalPayload, res) {
 		favorites = db.collection('favorites_noauth');
 	}
 	favorites.find(objToFind).next(function(err, doc) {
-		var item = {name: repo.name};
+		var item = {name: repo.name, favorite: false};
 		if(doc !== null) {
 			item.favorite = true;
-		} else {
-			item.favorite = false;
 		}
 		payload.push(item);
 		numProcessed++;
@@ -47,6 +56,13 @@ var markRepo = function(db, req, repo, payload, originalPayload, res) {
 };
 
 var server = restify.createServer();
+server.use(restify.bodyParser());
+server.get("identitycreds", function(req, res, next) {
+	res.send({
+		clientID: aadClientID,
+		callbackURL: aadCallbackUrl
+	});
+});
 server.get("/contributors", function(req, res, next) {
 	var github = new GitHubApi({
 		version: "3.0.0"
@@ -85,25 +101,35 @@ server.get("/repos/:user", function(req, res, next) {
 server.post("/favorite/:user/:repo", function(req, res, next) {
 	mongo.connect(mongoUri, function(err, db) {
 		var favorites = null;
-		var favDoc = {user: req.params.user, repo: req.params.repo};
 		var userid = req.header("userid");
 		var tenantid = req.header("tenantid");
+		var favDoc = {
+			user: req.params.user, 
+			repo: req.params.repo,
+			userid: userid,
+			tenantid: tenantid
+		};
+		
+		var isFavorite = req.params.isFavorite;
+		
 		if(userid != null && tenantid != null) {
 			favorites = db.collection('favorites');
-			favDoc.userid = userid;
-			favDoc.tenantid = tenantid;
 		} else {
 			favorites = db.collection('favorites_noauth');
 		}
+		
+		if(isFavorite) {
+			favorites.insertOne(favDoc);
+		} else {
+			favorites.findOneAndDelete(favDoc, null, function(err, result) {
+				if(err != null) {
+					console.log(err);
+				}
+			});
+		}
+		db.close();
+		res.send("OK");
 		//We attempt to remove the favorite
-		favorites.findOneAndDelete(favDoc, null, function(err, result) {
-			if(result.value == null) {
-				//The favorite doesn't exist. Create it.
-				favorites.insertOne(favDoc);
-			}
-			db.close();
-			res.send("OK");
-		});
 	});
 });
 server.get(/.*/, restify.serveStatic({
