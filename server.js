@@ -8,7 +8,7 @@ var mongoServer = process.env.DECODED_MONGO_SERVER;
 var mongoUri = "mongodb://" + mongoUser + ":" + mongoPassword + "@" + mongoServer;
 var aadClientID = process.env.DECODED_CLIENT_ID;
 var aadCallbackUrl = process.env.DECODED_CALLBACK_URL;
-var port = process.env.DECODED_PORT;
+var port = process.env.PORT | process.env.DECODED_PORT;
 
 var numProcessed = 0;
 
