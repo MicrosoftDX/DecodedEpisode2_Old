@@ -26,6 +26,6 @@ exit 999
 
 :build
 echo Building TypeScript: app.ts (using %tsc%)
-%tsc% app.ts
+%tsc% --out app.js app.ts
 echo Building TypeScript: client.ts (using %tsc%)
-%tsc% client.ts
+%tsc% --out client.js client.ts
