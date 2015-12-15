@@ -93,7 +93,7 @@ $(document).ready(function() {
 		});
 	});
 	
-	$.get("http://localhost:2346/contributors", function(result) {
+	$.get("/contributors", function(result) {
 		renderContributors(result);
 	});
 });
