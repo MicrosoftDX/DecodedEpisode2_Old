@@ -1,2 +1,2 @@
-tsc app.ts
-tsc client.ts
+[config]
+command = deploy.cmd
