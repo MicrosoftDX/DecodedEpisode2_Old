@@ -1,4 +1,4 @@
-var selectedContributor = null;
+var selectedPackage = null;
 var curUser = null;
 function getHeaders(user) {
     var headers = null;
@@ -8,43 +8,41 @@ function getHeaders(user) {
     return headers;
 }
 function renderContributors(contributors) {
+    $("#contributors_container").show();
+    $("#contributors_title span").html(selectedPackage);
     var $container = $("#contributors tbody");
     $container.html("");
     $.each(contributors, function (idx, contributor) {
-        $container.append("<tr>" + "<td><img src='" + contributor.avatar_url + "' /></td>" + "<td><a class='contributor' href='#'>" + contributor.login + "</a></td>" + "<td>" + contributor.contributions + "</td>" + "</tr>");
-    });
-    $(".contributor").click(function (e) {
-        var userName = $(e.target).html();
-        selectedContributor = userName;
-
-        $.ajax({
-            url: "/repos/" + userName,
-            headers: getHeaders(curUser),
-            success: function (result) {
-                renderRepos(userName, result);
-            }
-        });
+        $container.append("<tr>" + "<td><img src='" + contributor.avatar_url + "' /></td>" + "<td>" + contributor.login + "</td>" + "<td>" + contributor.contributions + "</td>" + "</tr>");
     });
 }
-function renderRepos(user, repos) {
+function renderRepos(repos) {
     var $container = $("#repos tbody");
-    $("#repo_title span").html(user);
-    $("#repo_title").show();
     $container.html("");
     $.each(repos, function (idx, repo) {
         var btnClass = "btn-default";
         if (repo.favorite) {
             btnClass = "btn-success";
         }
-        $container.append("<tr>" + '<td><a data-repo="' + repo.name + '" href="#" class="favorite btn ' + btnClass + '"><span class="glyphicon glyphicon-star"></span></a></td>' + "<td>" + repo.name + "</td>" + "</tr>");
+        $container.append("<tr>" + '<td><a data-repo="' + repo.name + '" href="#" class="favorite btn ' + btnClass + '"><span class="glyphicon glyphicon-star"></span></a></td>' + "<td><a class='repo' href='#'>" + repo.name + "</a></td>" + "</tr>");
     });
-    $("#repos").show();
+    $(".repo").click(function (e) {
+        var userName = $(e.target).html();
+        selectedPackage = userName;
+
+        $.ajax({
+            url: "/contributors/" + userName,
+            success: function (result) {
+                renderContributors(result);
+            }
+        });
+    });
     $(".favorite").click(function (e) {
         e.preventDefault();
         var $button = $(e.target).closest("a");
         var isFavorite = $button.hasClass("btn-default");
         $.ajax({
-            url: "/favorite/" + selectedContributor + "/" + $button.attr("data-repo"),
+            url: "/favorite/" + $button.attr("data-repo"),
             type: 'post',
             data: {
                 isFavorite: isFavorite
@@ -60,6 +58,15 @@ function renderRepos(user, repos) {
         });
     });
 }
+function getRepos() {
+    $.ajax({
+        url: "/repos",
+        headers: getHeaders(curUser),
+        success: function (result) {
+            renderRepos(result);
+        }
+    });
+}
 $(document).ready(function () {
     $.get("/identitycreds", function (result) {
         var identity = new Kurve.Identity(result.clientID, result.callbackURL);
@@ -69,15 +76,13 @@ $(document).ready(function () {
             identity.login(function (error) {
                 if (identity.isLoggedIn()) {
                     curUser = identity.getIdToken();
-                    $("#repo_title").hide();
-                    $("#repos").hide();
+                    $("#contributors_container").hide();
                     $("#login").hide();
+                    getRepos();
                 }
             });
         });
     });
 
-    $.get("/contributors", function (result) {
-        renderContributors(result);
-    });
+    getRepos();
 });

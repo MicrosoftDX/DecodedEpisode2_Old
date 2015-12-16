@@ -8,10 +8,10 @@
 			#contributors img {
 				height: 30px;
 			}
-			#repo_title {
+			#contributors_title {
 				display: none;
 			}
-			#repos {
+			#contributors_container {
 				display: none;
 			}
 		</style>
@@ -23,6 +23,20 @@
 				<a href="#" id="login" class="btn btn-primary">Log in</a>
 			</div>
 			<div class="col-md-6">
+				
+				<table class="table" id="repos">
+					<thead>
+						<tr>
+							<th>Favorite</th>
+							<th>Name</th>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+			</div>
+			<div id="contributors_container" class="col-md-6">
+				<h2 id="contributors_title">Contributors for <span></span></h2>
 				<table class="table" id="contributors">
 					<thead>
 						<tr>
@@ -35,19 +49,7 @@
 					</tbody>
 				</table>
 			</div>
-			<div class="col-md-6">
-				<h2 id="repo_title">Repositories for <span></span></h2>
-				<table class="table" id="repos">
-					<thead>
-						<tr>
-							<th>Favorite</th>
-							<th>Name</th>
-						</tr>
-					</thead>
-					<tbody>
-					</tbody>
-				</table>
-			</div>
+			
 		</div>
 	</body>
 </html>

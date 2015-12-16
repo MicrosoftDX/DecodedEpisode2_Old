@@ -19,6 +19,8 @@
   "dependencies": {
     "github": "^0.2.4",
     "mongodb": "^2.1.0",
+    "npm-registry": "^0.1.13",
+    "request": "^2.67.0",
     "restify": "^4.0.3"
   },
   "private": true
