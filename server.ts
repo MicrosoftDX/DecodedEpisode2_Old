@@ -1,9 +1,3 @@
-/// <reference path="typings/tsd.d.ts" />
-
-declare var require:any;
-declare var process:any;
-declare var __dirname:any;
-
 var NUM_PACKAGES_TO_SHOW = 10;
 
 var restify = require('restify');
@@ -88,8 +82,6 @@ server.get("/contributors/:repo", function(req, res, next) {
 			}
 		);
 	});
-	
-	
 	next();
 });
 server.get("/repos", function(req, res, next) {
