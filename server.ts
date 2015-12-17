@@ -1,3 +1,5 @@
+/// <reference path="typings/tsd.d.ts" />
+
 declare var require:any;
 declare var process:any;
 declare var __dirname:any;
